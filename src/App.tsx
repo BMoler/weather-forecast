@@ -1,7 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { getCombinedForecast } from "./services";
 import type { CombinedForecast } from "./types";
-import DayTable from "./DayTable";
+import DayTable, { type ThresholdMap } from "./DayTable";
+
+export const FORECAST_THRESHOLDS: ThresholdMap = {
+  "Precip Prob": { yellow: 50, red: 80 },
+  "Wind Speed": { yellow: 15, red: 20 },
+  "Wave Height": { yellow: 2, red: 4 },
+  Visibility: { yellow: 2000, red: 1000, direction: "below" },
+};
 
 function App() {
   const [forecast, setForecast] = useState<CombinedForecast | null>(null);
@@ -29,7 +36,6 @@ function App() {
         ],
         ["wave_height", "wind_wave_height", "swell_wave_height"],
       );
-      console.log(forecastData);
       setForecast(forecastData);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load forecast");
@@ -44,7 +50,13 @@ function App() {
       {forecast && (
         <div className="flex flex-col gap-2">
           {Object.entries(forecast.days).map(([day, dayData]) => (
-            <DayTable key={day} date={day} hours={dayData} />
+            <DayTable
+              key={day}
+              date={day}
+              hours={dayData}
+              thresholds={FORECAST_THRESHOLDS}
+              activeHours={{ start: 8, end: 18 }}
+            />
           ))}
         </div>
       )}

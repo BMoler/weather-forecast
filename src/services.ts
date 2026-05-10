@@ -20,7 +20,8 @@ export const getWeatherForecast = async (
     longitude: String(params.longitude),
     hourly: params.hourly.join(","),
     forecast_days: String(params.forecast_days ?? 10),
-    wind_speed_unit: "kn",
+    wind_speed_unit: params.wind_speed_unit ?? "kn",
+    precipitation_unit: params.precipitation_unit ?? "inch",
   }).toString();
 
   const response = await fetch(`${weatherForecastUrl}?${searchParams}`);

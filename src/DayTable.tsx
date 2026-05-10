@@ -1,9 +1,24 @@
 import type { FC } from "react";
 import type { HourlyRecord } from "./types";
 
+export interface Threshold {
+  yellow: number;
+  red: number;
+  direction?: "above" | "below";
+}
+
+export interface TimeRange {
+  start: number;
+  end: number;
+}
+
+export type ThresholdMap = Partial<Record<string, Threshold>>;
+
 interface DayTableProps {
   date: string;
   hours: HourlyRecord[];
+  thresholds?: ThresholdMap;
+  activeHours: TimeRange;
 }
 
 function fmtHour(iso: string): string {
@@ -14,48 +29,80 @@ function fmtHour(iso: string): string {
   return `${h - 12}p`;
 }
 
-const DayTable: FC<DayTableProps> = ({ date, hours }) => {
+function thresholdClass(value: number | null, threshold?: Threshold): string {
+  if (value == null || !threshold) return "";
+
+  if (threshold.direction === "below") {
+    if (value <= threshold.red) return "bg-red-300";
+    if (value <= threshold.yellow) return "bg-yellow-200";
+  } else {
+    if (value >= threshold.red) return "bg-red-300";
+    if (value >= threshold.yellow) return "bg-yellow-200";
+  }
+
+  return "";
+}
+
+function activeClass(hour: number, range: TimeRange): string {
+  if (hour >= range.start && hour <= range.end) return "bg-blue-100";
+  return "";
+}
+
+const DayTable: FC<DayTableProps> = ({
+  date,
+  hours,
+  thresholds,
+  activeHours,
+}) => {
   const rows: {
     label: string;
     unit: string;
     render: (h: HourlyRecord) => string;
+    value: (h: HourlyRecord) => number | null;
   }[] = [
     {
       label: "Precip Prob",
       unit: "%",
       render: (h) => `${h.precipitation_probability}`,
+      value: (h) => h.precipitation_probability,
     },
     {
       label: "Precip",
       unit: "in",
       render: (h) => (h.precipitation > 0 ? h.precipitation.toFixed(2) : "—"),
+      value: (h) => h.precipitation,
     },
     {
       label: "Wind Speed",
       unit: "kn",
       render: (h) => `${h.wind_speed_10m}`,
+      value: (h) => h.wind_speed_10m,
     },
     {
       label: "Visibility",
-      unit: "sm",
-      render: (h) => `${h.visibility}`,
+      unit: "m",
+      render: (h) => (h.visibility > 0 ? h.visibility.toFixed(0) : "—"),
+      value: (h) => h.visibility,
     },
     {
       label: "Wave Height",
       unit: "ft",
       render: (h) => (h.wave_height != null ? h.wave_height.toFixed(1) : "—"),
+      value: (h) => h.wave_height,
     },
     {
       label: "Swell Height",
       unit: "ft",
       render: (h) =>
         h.swell_wave_height != null ? h.swell_wave_height.toFixed(1) : "—",
+      value: (h) => h.swell_wave_height,
     },
     {
       label: "Wind Wave Height",
       unit: "ft",
       render: (h) =>
         h.wind_wave_heght != null ? h.wind_wave_heght.toFixed(1) : "—",
+      value: (h) => h.wind_wave_heght,
     },
   ];
 
@@ -90,11 +137,22 @@ const DayTable: FC<DayTableProps> = ({ date, hours }) => {
                     </span>
                   )}
                 </td>
-                {hours.map((h, i) => (
-                  <td key={i} className="px-1.5 py-1 text-center text-gray-800">
-                    {row.render(h)}
-                  </td>
-                ))}
+                {hours.map((h, i) => {
+                  const hr = new Date(h.time).getHours();
+                  const tClass = thresholdClass(
+                    row.value(h),
+                    thresholds ? thresholds[row.label] : undefined,
+                  );
+                  const aClass = tClass ? "" : activeClass(hr, activeHours);
+                  return (
+                    <td
+                      key={i}
+                      className={`px-1.5 py-1 text-center text-gray-800 ${tClass || aClass}`}
+                    >
+                      {row.render(h)}
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </tbody>
