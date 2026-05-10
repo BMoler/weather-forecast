@@ -68,6 +68,7 @@ export const getCombinedForecast = async (
       longitude,
       hourly: weatherVariables,
       forecast_days: forecastDays,
+      wind_speed_unit: "kn",
     }),
     getMarineForecast({
       latitude,

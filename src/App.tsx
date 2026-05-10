@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getCombinedForecast } from "./services";
 import type { CombinedForecast } from "./types";
+import DayTable from "./DayTable";
 
 function App() {
   const [forecast, setForecast] = useState<CombinedForecast | null>(null);
@@ -28,6 +29,7 @@ function App() {
         ],
         ["wave_height", "wind_wave_height", "swell_wave_height"],
       );
+      console.log(forecastData);
       setForecast(forecastData);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load forecast");
@@ -40,7 +42,11 @@ function App() {
       {isLoading && <div>Loading forecast…</div>}
       {error && <div>{error}</div>}
       {forecast && (
-        <div className="flex">{`Lat: ${forecast.latitude}, Lon: ${forecast.longitude}`}</div>
+        <div className="flex flex-col gap-2">
+          {Object.entries(forecast.days).map(([day, dayData]) => (
+            <DayTable key={day} date={day} hours={dayData} />
+          ))}
+        </div>
       )}
     </div>
   );
