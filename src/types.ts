@@ -47,7 +47,7 @@ interface WeatherForecastHourlyData {
   precipitation: number[];
   visibility: number[];
   weather_code: number[];
-  precipitation_proability: number[];
+  precipitation_probability: number[];
 }
 
 interface MarineForecastHourlyUnits {
@@ -87,4 +87,29 @@ export interface MarineForecastResult extends ForecastResult {
 export interface OpenMeteoError {
   error: true;
   reason: string;
+}
+
+// Combined Results
+export interface HourlyRecord {
+  time: string;
+
+  // Weather
+  precipitation: number;
+  precipitation_probability: number;
+  weather_code: number;
+  wind_speed_10m: number;
+  visibility: number;
+
+  // Marine
+  wave_height: number;
+  swell_wave_height: number;
+  wind_wave_heght: number;
+}
+
+export interface CombinedForecast {
+  latitude: number;
+  longitude: number;
+  elevation: number;
+  timezone: string;
+  days: Record<string, HourlyRecord[]>;
 }

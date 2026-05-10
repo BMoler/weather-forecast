@@ -1,25 +1,27 @@
 import { useCallback, useEffect } from "react";
-import { getMarineForecast, getWeatherForecast } from "./services";
+import { getCombinedForecast } from "./services";
 
 function App() {
   useEffect(() => {
-    getForecastData;
+    getForecastData();
   }, []);
 
   const getForecastData = useCallback(async () => {
-    const weatherForecastResult = await getWeatherForecast({
-      latitude: 30.37,
-      longitude: -89.09,
-      hourly: ["wind_speed_10m", "precipitation", "visibility", "weather_code"],
-    });
+    const forecast = await getCombinedForecast(
+      30.3674,
+      -89.0928,
+      10,
+      [
+        "wind_speed_10m",
+        "precipitation",
+        "visibility",
+        "weather_code",
+        "precipitation_probability",
+      ],
+      ["wave_height", "wind_wave_height", "swell_wave_height"],
+    );
 
-    const marineForecastResult = await getMarineForecast({
-      latitude: 30.37,
-      longitude: -89.09,
-      hourly: ["wave_height", "wind_wave_height", "swell_wave_height"],
-    });
-
-    console.log(weatherForecastResult, marineForecastResult);
+    console.log(forecast);
   }, []);
 
   return (
