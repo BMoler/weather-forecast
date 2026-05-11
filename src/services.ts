@@ -44,6 +44,7 @@ export const getMarineForecast = async (
     longitude: String(params.longitude),
     hourly: params.hourly.join(","),
     forecast_days: String(params.forecast_days ?? 10),
+    length_unit: params.length_unit ?? "imperial",
   }).toString();
 
   const response = await fetch(`${marineForecastUrl}?${searchParams}`);
@@ -76,6 +77,7 @@ export const getCombinedForecast = async (
       longitude,
       hourly: marineVariables,
       forecast_days: forecastDays,
+      length_unit: "imperial",
     }),
   ]);
 
